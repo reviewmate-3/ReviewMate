@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+.next/
+out/
+coverage/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+.dist/
+build/
+dist/
+
+# IDE
+.vscode/
+.idea/
+
+# Database
+*.sqlite3
+*.db
+reviewmate.db
