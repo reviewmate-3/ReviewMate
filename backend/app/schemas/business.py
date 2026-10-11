@@ -25,6 +25,19 @@ class BusinessOut(BaseModel):
     google_review_url: Optional[str]
     primary_color: Optional[str]
     logo_url: Optional[str]
+    feedback_questions: list[str] = []
 
     class Config:
         orm_mode = True
+
+
+class BusinessUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=2, max_length=200)
+    city: Optional[str] = None
+    google_review_url: Optional[str] = None
+    description: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    primary_color: Optional[str] = None
+    logo_url: Optional[str] = None
+    feedback_questions: list[str] = Field(default_factory=list, max_length=12)

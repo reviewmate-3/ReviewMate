@@ -9,9 +9,14 @@ from app.api.deps import get_current_business_owner
 from app.db.session import get_db
 from app.models.business import Business
 from app.models.business_category import BusinessCategory
-from app.schemas.business import BusinessCreate, BusinessOut
+from app.schemas.business import BusinessCreate, BusinessOut, BusinessUpdate
 
 router = APIRouter(prefix='/businesses', tags=['businesses'])
+DEFAULT_FEEDBACK_QUESTIONS = [
+    'What did you like about your experience?',
+    'How was the quality of the service?',
+    'Was our team helpful and professional?',
+]
 
 
 def slugify(value: str) -> str:
@@ -33,6 +38,7 @@ def serialize_business(business: Business) -> dict:
         'logo_url': business.logo_url,
         'primary_color': business.primary_color,
         'google_review_url': business.google_review_url,
+        'feedback_questions': business.feedback_questions or [],
         'is_active': business.is_active,
     }
 
@@ -68,6 +74,7 @@ def create_business(payload: BusinessCreate, db: Session = Depends(get_db), curr
         primary_color=payload.primary_color,
         google_review_url=payload.google_review_url,
         logo_url=payload.logo_url,
+        feedback_questions=DEFAULT_FEEDBACK_QUESTIONS.copy(),
         is_active=True,
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow(),
@@ -76,6 +83,40 @@ def create_business(payload: BusinessCreate, db: Session = Depends(get_db), curr
     db.commit()
     db.refresh(business)
     return {'success': True, 'data': serialize_business(business), 'message': 'Business created successfully.'}
+
+
+@router.put('/{business_id}')
+def update_business(
+    business_id: str,
+    payload: BusinessUpdate,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_business_owner),
+):
+    try:
+        business_uuid = uuid.UUID(business_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail='Invalid business id') from exc
+
+    business = db.query(Business).filter(
+        Business.id == business_uuid,
+        Business.owner_id == current_user.id,
+        Business.is_active.is_(True),
+    ).first()
+    if not business:
+        raise HTTPException(status_code=404, detail='Business not found')
+
+    values = payload.model_dump(exclude_unset=True)
+    if 'google_review_url' in values and values['google_review_url']:
+        if not values['google_review_url'].startswith(('https://', 'http://')):
+            raise HTTPException(status_code=422, detail='Google review URL must start with http:// or https://')
+    if 'feedback_questions' in values:
+        values['feedback_questions'] = [question.strip() for question in values['feedback_questions'] if question.strip()]
+    for key, value in values.items():
+        setattr(business, key, value)
+    business.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(business)
+    return {'success': True, 'data': serialize_business(business), 'message': 'Business updated successfully.'}
 
 
 @router.get('/categories')

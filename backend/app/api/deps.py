@@ -30,8 +30,14 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
 
 def get_current_business_owner(current_user: User = Depends(get_current_user)):
-    if current_user.role not in {'BUSINESS_OWNER', 'SUPER_ADMIN'}:
+    if current_user.role != 'BUSINESS_OWNER':
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Business owner access required')
+    return current_user
+
+
+def get_current_platform_admin(current_user: User = Depends(get_current_user)):
+    if current_user.role != 'SUPER_ADMIN':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Platform administrator access required')
     return current_user
 
 

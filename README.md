@@ -62,3 +62,17 @@ make docker-down
 ## Version
 
 ReviewMate v1.0.0
+
+## Foundation status
+
+Phase 1 provides the FastAPI/Next.js foundation, PostgreSQL and Redis
+development services, versioned Alembic migrations, environment validation,
+structured request logging, and health checks. The backend must be migrated
+before it is started:
+
+```bash
+docker compose up --build
+```
+
+Copy `.env.example` to `.env` for local overrides. Never commit `.env` or
+production credentials.

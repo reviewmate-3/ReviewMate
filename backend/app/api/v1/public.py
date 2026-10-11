@@ -31,6 +31,7 @@ def serialize_business(business: Business) -> dict[str, Any]:
         'logo_url': business.logo_url,
         'primary_color': business.primary_color,
         'google_review_url': business.google_review_url,
+        'feedback_questions': business.feedback_questions or [],
         'is_active': business.is_active,
     }
 
@@ -50,6 +51,8 @@ def get_public_business(slug: str, db: Session = Depends(get_db)):
     business = db.query(Business).filter(Business.slug == slug.lower()).first()
     if not business:
         raise HTTPException(status_code=404, detail='Business not found')
+    if not business.is_active:
+        raise HTTPException(status_code=404, detail='Business not found')
 
     services = db.query(Service).filter(Service.business_id == business.id, Service.is_active.is_(True)).order_by(Service.name.asc()).all()
     db.add(AnalyticsEvent(business_id=business.id, event_type='QR_SCAN', created_at=datetime.utcnow()))
@@ -62,6 +65,7 @@ def get_public_business(slug: str, db: Session = Depends(get_db)):
             'business': serialize_business(business),
             'services': [serialize_service(service) for service in services],
             'redirect_url': redirect_url,
+            'feedback_questions': business.feedback_questions or [],
         },
         'message': 'Business loaded.'
     }

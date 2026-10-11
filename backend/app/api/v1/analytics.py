@@ -16,17 +16,17 @@ router = APIRouter(prefix='/analytics', tags=['analytics'])
 def overview(db: Session = Depends(get_db), current_user=Depends(get_current_business_owner)):
     businesses = db.query(Business).filter(Business.owner_id == current_user.id).all()
     business_ids = [b.id for b in businesses]
-    qr_scans = db.query(AnalyticsEvent).filter(AnalyticsEvent.business_id.in_([str(b) for b in business_ids]), AnalyticsEvent.event_type == 'QR_SCAN').count()
-    feedback_submitted = db.query(ReviewSession).filter(ReviewSession.business_id.in_([str(b) for b in business_ids])).count()
-    review_generated = db.query(ReviewSession).filter(ReviewSession.business_id.in_([str(b) for b in business_ids]), ReviewSession.generated_review.isnot(None)).count()
-    google_clicks = db.query(AnalyticsEvent).filter(AnalyticsEvent.business_id.in_([str(b) for b in business_ids]), AnalyticsEvent.event_type == 'GOOGLE_CLICK').count()
+    qr_scans = db.query(AnalyticsEvent).filter(AnalyticsEvent.business_id.in_(business_ids), AnalyticsEvent.event_type == 'QR_SCAN').count()
+    feedback_submitted = db.query(ReviewSession).filter(ReviewSession.business_id.in_(business_ids)).count()
+    review_generated = db.query(ReviewSession).filter(ReviewSession.business_id.in_(business_ids), ReviewSession.generated_review.isnot(None)).count()
+    google_clicks = db.query(AnalyticsEvent).filter(AnalyticsEvent.business_id.in_(business_ids), AnalyticsEvent.event_type == 'GOOGLE_CLICK').count()
     return {'success': True, 'data': {'qr_scans': qr_scans, 'feedback_submitted': feedback_submitted, 'reviews_generated': review_generated, 'google_clicks': google_clicks}, 'message': 'Overview loaded.'}
 
 
 @router.get('/events')
 def events(db: Session = Depends(get_db), current_user=Depends(get_current_business_owner)):
     businesses = db.query(Business).filter(Business.owner_id == current_user.id).all()
-    ids = [str(b.id) for b in businesses]
+    ids = [b.id for b in businesses]
     records = db.query(AnalyticsEvent).filter(AnalyticsEvent.business_id.in_(ids)).order_by(AnalyticsEvent.created_at.desc()).limit(50).all()
     return {'success': True, 'data': [{'id': str(r.id), 'event_type': r.event_type, 'created_at': r.created_at.isoformat()} for r in records], 'message': 'Events loaded.'}
 
@@ -34,7 +34,7 @@ def events(db: Session = Depends(get_db), current_user=Depends(get_current_busin
 @router.get('/daily')
 def daily(db: Session = Depends(get_db), current_user=Depends(get_current_business_owner)):
     businesses = db.query(Business).filter(Business.owner_id == current_user.id).all()
-    ids = [str(b.id) for b in businesses]
+    ids = [b.id for b in businesses]
     events = db.query(AnalyticsEvent).filter(AnalyticsEvent.business_id.in_(ids)).all()
     daily = {}
     for event in events:

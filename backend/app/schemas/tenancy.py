@@ -13,3 +13,10 @@ class LocationCreate(BaseModel):
 class MemberInvite(BaseModel):
     email: str
     role: str = Field(default='STAFF', pattern='^(MANAGER|STAFF)$')
+
+
+class MemberCreate(BaseModel):
+    name: str = Field(..., min_length=2, max_length=120)
+    email: str
+    password: str = Field(..., min_length=8, max_length=128)
+    role: str = Field(default='STAFF', pattern='^(MANAGER|STAFF)$')

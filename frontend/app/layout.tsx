@@ -7,7 +7,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'ReviewMate',
     description: 'Turn genuine customer feedback into better reviews.',
-    type: 'website'
+    type: 'website',
+    images: ['/reviewmate-logo.png'],
   }
 };
 

@@ -4,12 +4,30 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_authorized_business, get_current_user
+from app.core.security import hash_password
 from app.db.session import get_db
 from app.models.business_member import BusinessMember
 from app.models.user import User
-from app.schemas.tenancy import MemberInvite
+from app.schemas.tenancy import MemberCreate, MemberInvite
 
 router = APIRouter(prefix='/members', tags=['members'])
+
+
+@router.post('/create', status_code=status.HTTP_201_CREATED)
+def create_member(payload: MemberCreate, business_id: str, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    business = get_authorized_business(business_id, db, current_user)
+    if business.owner_id != current_user.id and current_user.role != 'SUPER_ADMIN':
+        raise HTTPException(status_code=403, detail='Business owner access required')
+    email = payload.email.lower()
+    if db.query(User).filter(User.email == email).first():
+        raise HTTPException(status_code=409, detail='Email already registered')
+    user = User(name=payload.name, email=email, password_hash=hash_password(payload.password), role='BUSINESS_MANAGER' if payload.role == 'MANAGER' else 'STAFF', is_active=True)
+    db.add(user)
+    db.flush()
+    member = BusinessMember(business_id=business.id, user_id=user.id, role=payload.role, status='ACTIVE', joined_at=datetime.utcnow())
+    db.add(member)
+    db.commit()
+    return {'success': True, 'data': {'id': str(member.id), 'user_id': str(user.id), 'name': user.name, 'email': user.email, 'role': member.role, 'status': member.status}, 'message': 'Team member created.'}
 
 
 @router.get('/')

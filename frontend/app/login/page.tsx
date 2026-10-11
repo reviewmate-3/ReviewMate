@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { API_URL } from '@/lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('owner@reviewmate.app');
-  const [password, setPassword] = useState('DemoOwner123!');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -21,12 +21,15 @@ export default function LoginPage() {
       const response = await fetch(`${API_URL}/api/v1/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim(), password }),
       });
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data?.error?.message || data?.detail || 'Login failed.');
+        const validationDetails = data?.error?.details
+          ?.map((detail: { field?: string; message?: string }) => `${detail.field}: ${detail.message}`)
+          .join(' ');
+        throw new Error(validationDetails || data?.error?.message || data?.detail || 'Login failed.');
       }
 
       const token = data?.data?.access_token;
@@ -35,8 +38,9 @@ export default function LoginPage() {
       }
 
       localStorage.setItem('reviewmate_token', token);
+      localStorage.setItem('reviewmate_refresh_token', data.data.refresh_token || '');
       localStorage.setItem('reviewmate_user', JSON.stringify(data.data.user || {}));
-      router.push('/dashboard');
+      router.push(data.data.user?.role === 'SUPER_ADMIN' ? '/admin' : '/dashboard');
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Unable to log in.');
@@ -54,14 +58,12 @@ export default function LoginPage() {
           <p className="mt-2 text-sm text-slate-600">Business owner login</p>
         </div>
 
-        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-          Demo login: owner@reviewmate.app / DemoOwner123!
-        </div>
-
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label className="mb-2 block text-sm font-semibold text-slate-700">Email</label>
             <input
+              type="email"
+              required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none ring-0"
@@ -72,6 +74,8 @@ export default function LoginPage() {
             <label className="mb-2 block text-sm font-semibold text-slate-700">Password</label>
             <input
               type="password"
+              required
+              minLength={8}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none ring-0"

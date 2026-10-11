@@ -13,6 +13,7 @@ from app.api.v1.admin import router as admin_router
 from app.api.v1.analytics import router as analytics_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.businesses import router as businesses_router
+from app.api.v1.billing import router as billing_router
 from app.api.v1.public import router as public_router
 from app.api.v1.qr import router as qr_router
 from app.api.v1.reviews import router as reviews_router
@@ -20,15 +21,13 @@ from app.api.v1.services import router as services_router
 from app.api.v1.locations import router as locations_router
 from app.api.v1.members import router as members_router
 from app.config import settings
-from app.db.base import Base
+from app.core.logging import configure_logging
 from app.db.session import engine
 
+configure_logging(settings.LOG_LEVEL)
 logger = logging.getLogger('reviewmate')
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s %(message)s')
 
-Base.metadata.create_all(bind=engine)
-
-app = FastAPI(title='ReviewMate API', version='1.0.0', description='Customer feedback and review assistance API.')
+app = FastAPI(title='ReviewMate API', version=settings.APP_VERSION, description='Customer feedback and review assistance API.')
 
 app.add_middleware(
     CORSMiddleware,
@@ -46,17 +45,36 @@ async def request_logging_middleware(request: Request, call_next):
     response = await call_next(request)
     duration_ms = round((time.perf_counter() - started) * 1000, 2)
     response.headers['X-Request-ID'] = request_id
-    logger.info('%s %s status=%s duration_ms=%s request_id=%s', request.method, request.url.path, response.status_code, duration_ms, request_id)
+    logger.info(
+        'request completed',
+        extra={
+            'request_id': request_id,
+            'endpoint': f'{request.method} {request.url.path}',
+            'status': response.status_code,
+            'duration_ms': duration_ms,
+        },
+    )
     return response
 
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    details = [
+        {
+            'field': '.'.join(str(part) for part in error.get('loc', []) if part != 'body') or 'request',
+            'message': error.get('msg', 'Invalid value.'),
+        }
+        for error in exc.errors()
+    ]
     return JSONResponse(
         status_code=422,
         content={
             'success': False,
-            'error': {'code': 'VALIDATION_ERROR', 'message': 'Request validation failed.'},
+            'error': {
+                'code': 'VALIDATION_ERROR',
+                'message': 'Request validation failed.',
+                'details': details,
+            },
         },
     )
 
@@ -72,9 +90,18 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     )
 
 
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    logger.exception('unhandled request error', extra={'endpoint': f'{request.method} {request.url.path}'})
+    return JSONResponse(
+        status_code=500,
+        content={'success': False, 'error': {'code': 'INTERNAL_SERVER_ERROR', 'message': 'An unexpected error occurred.'}},
+    )
+
+
 @app.get('/health')
 def health():
-    return {'status': 'healthy', 'version': '1.0.0'}
+    return {'status': 'healthy', 'version': settings.APP_VERSION}
 
 
 @app.get('/health/db')
@@ -84,6 +111,7 @@ def health_db():
             conn.execute(text('SELECT 1'))
         return {'status': 'healthy', 'database': 'connected'}
     except Exception:
+        logger.exception('database health check failed')
         return JSONResponse(status_code=503, content={'status': 'unhealthy', 'database': 'disconnected'})
 
 
@@ -93,11 +121,13 @@ def health_redis():
         Redis.from_url(settings.REDIS_URL, decode_responses=True).ping()
         return {'status': 'healthy', 'redis': 'connected'}
     except Exception:
+        logger.exception('redis health check failed')
         return JSONResponse(status_code=503, content={'status': 'unhealthy', 'redis': 'disconnected'})
 
 
 app.include_router(auth_router, prefix='/api/v1')
 app.include_router(businesses_router, prefix='/api/v1')
+app.include_router(billing_router, prefix='/api/v1')
 app.include_router(services_router, prefix='/api/v1')
 app.include_router(locations_router, prefix='/api/v1')
 app.include_router(members_router, prefix='/api/v1')

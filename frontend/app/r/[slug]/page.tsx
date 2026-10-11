@@ -15,6 +15,7 @@ type PublicData = {
   business: { name: string; city?: string | null; logo_url?: string | null; primary_color?: string | null };
   services: { id: string; name: string }[];
   redirect_url: string;
+  feedback_questions: string[];
 };
 
 export default function CustomerPage({ params }: { params: { slug: string } }) {
@@ -27,6 +28,7 @@ export default function CustomerPage({ params }: { params: { slug: string } }) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     fetch(`${API_URL}/api/v1/public/business/${encodeURIComponent(params.slug)}`)
@@ -70,27 +72,28 @@ export default function CustomerPage({ params }: { params: { slug: string } }) {
     window.open(data.redirect_url, '_blank', 'noopener,noreferrer');
   }
 
-  if (loading) return <main className="flex min-h-screen items-center justify-center p-6 text-slate-600">Loading business profile...</main>;
-  if (error && !data) return <main className="flex min-h-screen items-center justify-center p-6 text-center text-red-700">{error}</main>;
+  if (loading) return <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6 text-center text-slate-600" aria-live="polite">Loading business profile...</main>;
+  if (error && !data) return <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6 text-center text-red-700" role="alert">{error}</main>;
   if (!data) return null;
 
   const brandColor = data.business.primary_color || '#2563eb';
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-6 sm:py-10">
-      <div className="mx-auto max-w-md overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-soft">
-        <header className="p-6 text-center" style={{ borderTop: `6px solid ${brandColor}` }}>
+    <main className="min-h-screen bg-slate-100 px-3 py-4 sm:px-4 sm:py-10">
+      <div className="mx-auto min-h-[calc(100vh-2rem)] max-w-md overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-soft sm:min-h-0">
+        <header className="p-5 text-center sm:p-6" style={{ borderTop: `6px solid ${brandColor}` }}>
           {data.business.logo_url ? <img src={data.business.logo_url} alt="" className="mx-auto mb-4 h-16 w-16 rounded-2xl object-cover" /> : <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl text-2xl font-black text-white" style={{ backgroundColor: brandColor }}>{data.business.name.charAt(0).toUpperCase()}</div>}
           <h1 className="text-2xl font-black text-slate-900">{data.business.name}</h1>
           {data.business.city && <p className="mt-1 text-sm text-slate-500">{data.business.city}</p>}
         </header>
         <div className="px-6 pb-6">
           {!review ? <form onSubmit={submitFeedback} className="space-y-6">
-            <div><p className="text-center text-sm text-slate-500">Step 1 of 3</p><h2 className="mt-2 text-center text-2xl font-black text-slate-900">How was your experience?</h2><div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">{ratings.map((item) => <button type="button" key={item.value} onClick={() => setRating(item.value)} aria-pressed={rating === item.value} className={`rounded-2xl border px-3 py-3 text-sm font-semibold ${rating === item.value ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 bg-slate-50 text-slate-700'}`}><span className="mr-1 text-lg">{item.icon}</span>{item.label}</button>)}</div></div>
-            <label className="block text-sm font-semibold text-slate-700">What service did you receive?<select value={service} onChange={(event) => setService(event.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base font-normal outline-none focus:border-blue-600">{data.services.map((item) => <option key={item.id} value={item.name}>{item.name}</option>)}<option value="Other">Other</option></select></label>
+            <div><p className="text-center text-sm text-slate-500">Your feedback stays yours</p><h2 className="mt-2 text-center text-2xl font-black text-slate-900">How was your experience?</h2><div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">{ratings.map((item) => <button type="button" key={item.value} onClick={() => setRating(item.value)} aria-pressed={rating === item.value} className={`min-h-12 rounded-2xl border px-3 py-3 text-sm font-semibold ${rating === item.value ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 bg-slate-50 text-slate-700'}`}><span className="mr-1 text-lg">{item.icon}</span>{item.label}</button>)}</div></div>
+            <label className="block text-sm font-semibold text-slate-700">What service did you receive?<select value={service} onChange={(event) => setService(event.target.value)} className="mt-2 min-h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base font-normal outline-none focus:border-blue-600">{data.services.map((item) => <option key={item.id} value={item.name}>{item.name}</option>)}<option value="Other">Other</option></select></label>
             <label className="block text-sm font-semibold text-slate-700">Tell us about your experience.<textarea value={feedback} onChange={(event) => setFeedback(event.target.value)} minLength={10} maxLength={1500} rows={5} required className="mt-2 w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base font-normal outline-none focus:border-blue-600" placeholder="Share what happened in your own words" /></label>
+            {data.feedback_questions.length > 0 && <div className="rounded-2xl bg-slate-50 p-4"><p className="text-sm font-bold text-slate-700">A few things you can mention</p><ul className="mt-2 space-y-2 text-sm text-slate-600">{data.feedback_questions.map((question) => <li key={question}>• {question}</li>)}</ul></div>}
             {error && <p className="text-sm text-red-700">{error}</p>}
-            <button type="submit" disabled={submitting || !rating || !service} className="w-full rounded-2xl px-5 py-4 text-base font-bold text-white disabled:opacity-50" style={{ backgroundColor: brandColor }}>{submitting ? 'Creating your draft...' : 'Create my review draft'}</button>
-          </form> : <section className="space-y-5"><div><p className="text-center text-sm text-slate-500">Step 3 of 3</p><h2 className="mt-2 text-center text-2xl font-black text-slate-900">Your review draft</h2></div><textarea value={review} onChange={(event) => setReview(event.target.value)} maxLength={1500} rows={7} className="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base leading-7 text-slate-800 outline-none focus:border-blue-600" aria-label="Editable review draft" /><div className="grid grid-cols-2 gap-3"><button type="button" onClick={() => navigator.clipboard.writeText(review)} className="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-bold text-slate-700">Copy review</button><button type="button" onClick={() => setReview('')} className="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-bold text-slate-700">Edit feedback</button></div><button type="button" onClick={continueToGoogle} className="w-full rounded-2xl px-5 py-4 text-base font-bold text-white" style={{ backgroundColor: brandColor }}>Continue to Google</button><p className="text-center text-xs leading-5 text-slate-500">You choose whether to use, edit, or post this draft. ReviewMate never submits a review automatically.</p></section>}
+            <button type="submit" disabled={submitting || !rating || !service} className="min-h-12 w-full rounded-2xl px-5 py-4 text-base font-bold text-white disabled:opacity-50" style={{ backgroundColor: brandColor }}>{submitting ? 'Creating your draft...' : 'Create my review draft'}</button>
+          </form> : <section className="space-y-5"><div><p className="text-center text-sm text-slate-500">Draft ready</p><h2 className="mt-2 text-center text-2xl font-black text-slate-900">Review your words</h2></div><textarea value={review} onChange={(event) => setReview(event.target.value)} maxLength={1500} rows={7} className="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base leading-7 text-slate-800 outline-none focus:border-blue-600" aria-label="Editable review draft" /><div className="grid grid-cols-2 gap-3"><button type="button" onClick={async () => { await navigator.clipboard.writeText(review); setCopied(true); }} className="min-h-12 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-bold text-slate-700">{copied ? 'Copied' : 'Copy review'}</button><button type="button" onClick={() => setReview('')} className="min-h-12 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-bold text-slate-700">Edit feedback</button></div><button type="button" onClick={continueToGoogle} className="min-h-12 w-full rounded-2xl px-5 py-4 text-base font-bold text-white" style={{ backgroundColor: brandColor }}>Continue to Google</button><p className="text-center text-xs leading-5 text-slate-500">You choose whether to use, edit, or post this draft. ReviewMate never submits a review automatically.</p></section>}
         </div>
       </div>
     </main>

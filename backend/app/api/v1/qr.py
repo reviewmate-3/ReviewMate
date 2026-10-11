@@ -10,6 +10,7 @@ from app.api.deps import get_current_business_owner
 from app.db.session import get_db
 from app.models.business import Business
 from app.models.qr_code import QRCode
+from app.config import settings
 
 router = APIRouter(prefix='/qr', tags=['qr'])
 
@@ -25,7 +26,7 @@ def generate_qr(business_id: str, db: Session = Depends(get_db), current_user=De
     if not business:
         raise HTTPException(status_code=404, detail='Business not found')
 
-    destination_url = f'https://reviewmate.com/r/{business.slug}'
+    destination_url = f'{settings.FRONTEND_URL.rstrip("/")}/r/{business.slug}'
     qr = qrcode.QRCode(version=1, box_size=10, border=4)
     qr.add_data(destination_url)
     qr.make(fit=True)

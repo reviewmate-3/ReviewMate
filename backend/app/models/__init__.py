@@ -9,3 +9,4 @@ from app.models.analytics_event import AnalyticsEvent
 from app.models.refresh_token import RefreshToken
 from app.models.location import Location
 from app.models.business_member import BusinessMember
+from app.models.subscription import Plan, Subscription

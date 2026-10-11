@@ -4,10 +4,7 @@ export default function HomePage() {
       <nav className="border-b border-slate-200 bg-white/90 backdrop-blur-sm">
         <div className="container-shell flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-lg font-bold text-white">R</div>
-            <div>
-              <div className="text-xl font-black text-slate-900">ReviewMate</div>
-            </div>
+            <img src="/reviewmate-logo.png" alt="ReviewMate" className="h-12 w-auto object-contain" />
           </div>
           <div className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
             <a href="#how-it-works">How it works</a>
@@ -35,19 +32,19 @@ export default function HomePage() {
             <a href="/signup" className="rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-soft">Get Started</a>
             <a href="#how-it-works" className="rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700">See How It Works</a>
           </div>
-          <div className="mt-8 flex items-center gap-8 text-sm text-slate-500">
-            <div><span className="font-bold text-slate-900">1,200+</span> businesses</div>
-            <div><span className="font-bold text-slate-900">4.9/5</span> customer experience</div>
+          <div className="mt-8 flex flex-wrap gap-3 text-sm text-slate-600">
+            <span className="rounded-full bg-slate-100 px-3 py-2">No customer account required</span>
+            <span className="rounded-full bg-slate-100 px-3 py-2">Mobile-first QR flow</span>
           </div>
         </div>
         <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
           <div className="rounded-2xl bg-slate-900 p-6 text-white">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-blue-500" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 text-sm font-bold text-white">R</div>
                 <div>
-                  <div className="font-bold">The I-Service</div>
-                  <div className="text-xs text-slate-300">Mobile Repair</div>
+                <div className="font-bold">Your business</div>
+                <div className="text-xs text-slate-300">Customer feedback flow</div>
                 </div>
               </div>
               <div className="rounded-full bg-emerald-500/20 px-2 py-1 text-xs text-emerald-300">Live</div>
@@ -73,16 +70,18 @@ export default function HomePage() {
           </div>
           <div className="grid gap-6 md:grid-cols-5">
             {[
-              'Create your business profile',
-              'Generate your QR code',
-              'Customers scan and share feedback',
-              'AI helps polish their words',
-              'Customer chooses whether to post on Google'
-            ].map((step, index) => (
-              <div key={step} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              ['Create your business profile', 'Add your Google review page and customer questions', '/dashboard/business'],
+              ['Generate your QR code', 'Create a QR that points customers to your ReviewMate page', '/dashboard/qr'],
+              ['Customers scan and share feedback', 'Customers can respond without creating an account', '/login'],
+              ['AI helps polish their words', 'AI rewrites only what the customer actually shared', '#features'],
+              ['Customer chooses whether to post on Google', 'The customer edits, copies, and decides what happens next', '#features']
+            ].map(([step, description, href], index) => (
+              <a href={href} key={step} className="rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-1 hover:border-blue-300 hover:bg-blue-50">
                 <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 font-bold text-white">{index + 1}</div>
                 <p className="text-base font-semibold text-slate-800">{step}</p>
-              </div>
+                <p className="mt-2 text-sm leading-6 text-slate-500">{description}</p>
+                <span className="mt-4 inline-block text-sm font-semibold text-blue-700">Explore step →</span>
+              </a>
             ))}
           </div>
         </div>
@@ -107,6 +106,13 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      <footer className="border-t border-slate-200 bg-white py-10">
+        <div className="container-shell flex flex-col items-center justify-between gap-5 sm:flex-row">
+          <img src="/reviewmate-logo.png" alt="ReviewMate" className="h-16 w-auto object-contain" />
+          <p className="text-sm text-slate-500">Collect feedback. Build your reputation. Grow your business.</p>
+        </div>
+      </footer>
 
       <section id="pricing" className="bg-slate-950 py-20 text-white">
         <div className="container-shell">
