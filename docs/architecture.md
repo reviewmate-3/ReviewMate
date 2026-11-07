@@ -1,6 +1,6 @@
-# ReviewMate architecture
+# Expera architecture
 
-ReviewMate is structured as a monorepo with a Next.js frontend and a FastAPI backend.
+Expera is structured as a monorepo with a Next.js frontend and a FastAPI backend.
 
 ## Layers
 

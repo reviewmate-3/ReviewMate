@@ -81,12 +81,15 @@ async def create_public_review_session(payload: PublicReviewRequest, db: Session
     service = db.query(Service).filter(Service.business_id == business.id, Service.name.ilike(service_name)).first()
 
     provider = AIProviderFactory.get_provider()
-    generated = await provider.generate_review(
-        business_context={'business_name': business.name},
-        service=service_name,
-        rating=payload.rating,
-        feedback=payload.feedback,
-    )
+    try:
+        generated = await provider.generate_review(
+            business_context={'business_name': business.name},
+            service=service_name,
+            rating=payload.rating,
+            feedback=payload.feedback,
+        )
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
     review_session = ReviewSession(
         business_id=business.id,

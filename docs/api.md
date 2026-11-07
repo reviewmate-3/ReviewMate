@@ -1,4 +1,4 @@
-# ReviewMate API guide
+# Expera API guide
 
 ## Core endpoints
 

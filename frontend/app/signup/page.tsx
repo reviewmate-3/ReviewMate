@@ -3,8 +3,8 @@ export default function SignupPage() {
     <main className="flex min-h-screen items-center justify-center bg-slate-100 p-6">
       <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-8 shadow-soft">
         <div className="mb-8 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-xl font-black text-white">R</div>
-          <h1 className="mt-4 text-2xl font-black text-slate-900">Create your ReviewMate account</h1>
+          <img src="/expera-logo.svg" alt="Expera" className="mx-auto h-12 w-auto" />
+          <h1 className="mt-4 text-2xl font-black text-slate-900">Create your Expera account</h1>
         </div>
         <form className="space-y-4">
           <div>
