@@ -15,7 +15,7 @@ def overview(db: Session = Depends(get_db), current_user=Depends(get_current_pla
     return {
         'success': True,
         'data': {
-            'platform': 'reviewmate',
+            'platform': 'expera',
             'admin_email': current_user.email,
             'businesses': db.query(Business).count(),
             'users': db.query(User).count(),

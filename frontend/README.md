@@ -1,6 +1,6 @@
-# ReviewMate Frontend
+# Expera Frontend
 
-This is the Next.js frontend for the ReviewMate multi-tenant SaaS application.
+This is the Next.js frontend for the Expera multi-tenant customer experience intelligence platform.
 
 ## Local setup
 

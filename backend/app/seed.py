@@ -34,7 +34,7 @@ def seed_demo_data() -> None:
         if not exists:
             db.add(BusinessCategory(name=name, slug=slug, description=name, is_active=True, created_at=datetime.utcnow()))
 
-    owner_email = 'owner@reviewmate.app'
+    owner_email = 'owner@expera.app'
     owner = db.query(User).filter_by(email=owner_email).first()
     if not owner:
         owner = User(
@@ -108,5 +108,5 @@ def seed_demo_data() -> None:
 if __name__ == '__main__':
     seed_demo_data()
     print('Seed data loaded.')
-    print('Business owner login: owner@reviewmate.app / DemoOwner123!')
+    print('Business owner login: owner@expera.app / DemoOwner123!')
     print('Demo business public slug: the-i-service')

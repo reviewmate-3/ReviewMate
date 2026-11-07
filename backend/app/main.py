@@ -25,9 +25,9 @@ from app.core.logging import configure_logging
 from app.db.session import engine
 
 configure_logging(settings.LOG_LEVEL)
-logger = logging.getLogger('reviewmate')
+logger = logging.getLogger('expera')
 
-app = FastAPI(title='ReviewMate API', version=settings.APP_VERSION, description='Customer feedback and review assistance API.')
+app = FastAPI(title='Expera API', version=settings.APP_VERSION, description='Customer experience intelligence and feedback API.')
 
 app.add_middleware(
     CORSMiddleware,

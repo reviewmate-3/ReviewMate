@@ -1,6 +1,6 @@
-# ReviewMate
+# Expera
 
-ReviewMate is an AI-powered customer feedback and Google review assistant for local businesses. It helps customers share genuine feedback and turn their own words into a cleaner, natural review draft before they choose whether to continue to Google.
+Expera is a customer experience intelligence platform for local businesses. It helps businesses collect feedback, understand customer sentiment, improve their reputation, and turn customer-provided words into a clearer review draft before they choose whether to continue to Google.
 
 This repository follows a monorepo structure with a Next.js frontend and a FastAPI backend.
 
@@ -61,7 +61,7 @@ make docker-down
 
 ## Version
 
-ReviewMate v1.0.0
+Expera v1.0.0
 
 ## Foundation status
 

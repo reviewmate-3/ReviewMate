@@ -1,6 +1,6 @@
 # Database design
 
-ReviewMate uses PostgreSQL in production with SQLAlchemy models and Alembic migrations.
+Expera uses PostgreSQL in production with SQLAlchemy models and Alembic migrations.
 
 ## Core tables
 - users

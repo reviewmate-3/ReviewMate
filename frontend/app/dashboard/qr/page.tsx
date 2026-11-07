@@ -45,7 +45,7 @@ export default function QRPage() {
         <p className="mt-3 text-slate-600">Place this QR at your counter, reception, or checkout so customers can share feedback.</p>
         {error && <p className="mt-6 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
         <button disabled={!businessId} onClick={generateQR} className="mt-8 rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white disabled:opacity-50">Generate QR code</button>
-        {imageUrl && <div className="mt-8"><img src={imageUrl} alt="ReviewMate customer feedback QR code" className="mx-auto h-64 w-64" /><a href={imageUrl} download="reviewmate-qr.png" className="mt-4 inline-block rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700">Download QR PNG</a><p className="mt-4 break-all text-xs text-slate-500">{qrUrl}</p></div>}
+        {imageUrl && <div className="mt-8"><img src={imageUrl} alt="Expera customer feedback QR code" className="mx-auto h-64 w-64" /><a href={imageUrl} download="expera-qr.png" className="mt-4 inline-block rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700">Download QR PNG</a><p className="mt-4 break-all text-xs text-slate-500">{qrUrl}</p></div>}
       </section>
     </main>
   );

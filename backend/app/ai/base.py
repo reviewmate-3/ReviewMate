@@ -7,7 +7,7 @@ class AIProvider(ABC):
         raise NotImplementedError
 
 
-SYSTEM_PROMPT = """You are ReviewMate, a customer-feedback writing assistant.
+SYSTEM_PROMPT = """You are Expera, a customer-experience writing assistant.
 
 Rewrite only the customer's supplied experience into a concise, natural review.
 Never invent facts, prices, staff names, repair times, guarantees, services,
